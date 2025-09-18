@@ -1,0 +1,29 @@
+[
+  {
+    "model": "guia.eixo",
+    "pk": 1,
+    "fields": {
+      "nome": "Licenças e Afastamentos",
+      "slug": "licencas-e-afastamentos",
+      "descricao": "Procedimentos de licenças e afastamentos de servidores",
+      "ordem": 2
+    }
+  },
+  {
+    "model": "guia.procedimento",
+    "pk": 1,
+    "fields": {
+      "eixo": 1,
+      "titulo": "Licença Maternidade",
+      "slug": "licenca-maternidade",
+      "o_que_e": "Afastamento remunerado assegurado à servidora gestante. Em regra: 180 dias para estatutárias/cargo comissionado; 120 dias para REDA.",
+      "quem_tem_direito": "Servidoras gestantes da UNEB.",
+      "documentos_exigidos": "Requerimento de Direitos e Vantagens (RDV)\nCertidão de nascimento/adoção\nAtestado médico original (quando aplicável)",
+      "procedimentos_passo": "Solicitar via RDV no protocolo do Departamento\nAnálise pelo Colegiado e Direção do Departamento\nEncaminhamento do processo à PGDP para análise e publicação de Portaria",
+      "base_legal_regimentar": "CF/88, art. 7º, XVIII\nCE/BA, art. 41, IX e X\nLei 6.677/1994 (arts. 154 a 158)\nPareceres PGE PA-NPE-CSS-190-2011 e PA-NPE-CSS-488-2010",
+      "observacoes_praticas": "Recomenda-se protocolar antes do parto para evitar sobrecarga do Departamento\nSe ambos os pais forem servidores públicos, indicar qual utilizará o benefício",
+      "link_formulario": "https://sei.ba.gov.br/",
+      "texto_link": "Abrir no SEI/UNEB – Formulário RDV"
+    }
+  }
+]

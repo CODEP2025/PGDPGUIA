@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load static %}
+{% load guia_extras %}
+
+{% block content %}
+<style>
+  .two-col { display: grid; grid-template-columns: 1fr; gap: 1.25rem; max-width: 1100px; margin: 0 auto; }
+  @media (min-width: 900px) { .two-col { grid-template-columns: 2fr 1fr; } }
+  .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 1rem 1.2rem; }
+  .h1 { font-size: 1.8rem; margin: 0; color: #0b3a7e; }
+  h2 { margin-top: 1rem; color: #0b3a7e; font-size: 1.05rem; letter-spacing: .02em; }
+  ul { padding-left: 1.1rem; }
+  details summary { cursor: pointer; }
+  .btn { cursor:pointer; border:0; border-radius:8px; padding:.6rem .9rem; }
+  .btn-sei { background:#0b5fff; color:#fff; text-decoration:none; display:inline-block; }
+  .btn-print { background:#111827; color:#fff; }
+</style>
+
+<div class="two-col">
+  <article class="card">
+    <h1 class="h1">{{ proc.titulo }}</h1>
+    {% if proc.eixo %}<p><strong>Eixo:</strong> {{ proc.eixo.nome }}</p>{% endif %}
+
+    {% if proc.o_que_e %}
+      <h2>O QUE É</h2>
+      <div>{{ proc.o_que_e|linebreaks }}</div>
+    {% endif %}
+
+    {% if proc.quem_tem_direito %}
+      <h2>QUEM TEM DIREITO</h2>
+      <div>{{ proc.quem_tem_direito|linebreaks }}</div>
+    {% endif %}
+
+    {% if proc.documentos_exigidos %}
+      <h2>DOCUMENTOS EXIGIDOS</h2>
+      <ul>
+        {% for item in proc.documentos_exigidos|lines %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% if proc.procedimentos_passo %}
+      <h2>PROCEDIMENTOS (PASSO A PASSO)</h2>
+      <ul>
+        {% for item in proc.procedimentos_passo|lines %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% if proc.base_legal_regimentar %}
+      <h2>BASE LEGAL/REGIMENTAR</h2>
+      <ul>
+        {% for item in proc.base_legal_regimentar|lines %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </article>
+
+  <aside class="card">
+    <h2 style="margin-top:0;">Ações</h2>
+    {% if proc.link_formulario %}
+      <p><a class="btn btn-sei no-print" href="{{ proc.link_formulario }}" target="_blank" rel="noopener">{{ proc.texto_link|default:"Abrir no SEI/UNEB – Formulário RDV" }}</a></p>
+    {% endif %}
+    <p><button class="btn btn-print no-print" onclick="window.print()">Gerar PDF desta página</button></p>
+
+    {% if proc.observacoes_praticas %}
+      <details style="margin-top:1rem;" open>
+        <summary><strong>OBSERVAÇÕES PRÁTICAS</strong></summary>
+        <div style="padding:.5rem 0;">
+          <ul>
+            {% for item in proc.observacoes_praticas|lines %}
+              <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </details>
+    {% endif %}
+
+    <h2>FAQ</h2>
+    <input type="text" placeholder="Buscar na FAQ…" oninput="filterFaq(this.value)" class="no-print" style="width:100%;padding:.5rem;border:1px solid #ddd;border-radius:8px;">
+    <div id="faq" style="margin-top:.5rem;">
+      <details>
+        <summary>Quem pode solicitar?</summary>
+        <div style="padding:.5rem 0;">Exemplo. Você pode ligar esta FAQ ao banco de dados futuramente.</div>
+      </details>
+      <details>
+        <summary>Quais documentos são necessários?</summary>
+        <div style="padding:.5rem 0;">Exemplo de resposta curta.</div>
+      </details>
+    </div>
+  </aside>
+</div>
+
+<script>
+function filterFaq(q){
+  q = (q||'').toLowerCase();
+  const items = document.querySelectorAll('#faq details');
+  items.forEach(d => {
+    const text = d.innerText.toLowerCase();
+    d.open = q ? text.includes(q) : false;
+    d.style.display = !q || text.includes(q) ? '' : 'none';
+  });
+}
+</script>
+{% endblock %}

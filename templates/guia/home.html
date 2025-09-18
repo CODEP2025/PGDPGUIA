@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+  .is-hidden { display: none; }
+  .home-wrap { max-width: 1100px; margin: 0 auto; }
+  .home-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+  @media (min-width: 900px) { .home-grid { grid-template-columns: 320px 1fr; } }
+  .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 1rem; }
+  .card h2 { margin: 0 0 .75rem 0; font-size: 1.1rem; }
+  .btn { cursor: pointer; border: 0; border-radius: 8px; padding: .6rem .9rem; }
+  .btn-primary { background: #1f4fd7; color: #fff; }
+  .btn-ghost { background: transparent; }
+  .muted { color: #6b7280; font-size: .95rem; }
+  .list { list-style: none; padding: 0; margin: 0; }
+  .list li + li { border-top: 1px solid #f0f2f5; }
+  .list a { display: block; padding: .75rem 0; text-decoration: none; color: inherit; }
+  .badge { display: inline-block; background: #eef2ff; color: #1f4fd7; border-radius: 999px; padding: .15rem .6rem; font-size: .8rem; }
+  .split { display: grid; gap: .5rem; grid-template-columns: 1fr auto; align-items: center; }
+  .field { display: grid; gap: .35rem; }
+  .field input, .field select { width: 100%; padding: .55rem .65rem; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; }
+</style>
+
+<div class="home-wrap">
+  <div class="card" style="margin-bottom: 1rem;">
+    <div class="split">
+      <h1 style="margin:0;">Guia PGDP — Consulta de Procedimentos</h1>
+      {% if request.GET.q or request.GET.eixo or request.GET.procedimento %}
+        <span class="badge">Filtros ativos</span>
+      {% else %}
+        <span class="badge">Busca inicial</span>
+      {% endif %}
+    </div>
+    <p class="muted" style="margin:.5rem 0 0 0;">
+      Pesquise pelo nome do procedimento. Os filtros de <strong>Eixo</strong> e <strong>Procedimento</strong> aparecem somente após a primeira busca para manter a tela limpa.
+    </p>
+  </div>
+
+  <div class="home-grid">
+    <aside class="card {% if not request.GET.q and not request.GET.eixo and not request.GET.procedimento %}is-hidden{% endif %}" id="filters">
+      <h2>Filtros</h2>
+      <form method="get" action="" id="filtersForm">
+        <div class="field">
+          <label for="q">Pesquisar procedimento</label>
+          <input id="q" name="q" type="text" placeholder="Ex.: Adicional de insalubridade" value="{{ request.GET.q|default_if_none:'' }}">
+        </div>
+
+        <div class="field">
+          <label for="eixo">Eixo</label>
+          <select id="eixo" name="eixo">
+            <option value="">— Selecionar —</option>
+            {% for e in eixos %}
+              <option value="{{ e.id }}" {% if request.GET.eixo == e.id|stringformat:"s" %}selected{% endif %}>{{ e.nome }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="procedimento">Procedimento</label>
+          <select id="procedimento" name="procedimento">
+            <option value="">— Selecionar —</option>
+            {% for p in procedimentos_opcoes %}
+              <option value="{{ p.id }}" {% if request.GET.procedimento == p.id|stringformat:"s" %}selected{% endif %}>{{ p.titulo }}</option>
+            {% endfor %}
+          </select>
+          <small class="muted">A lista acima pode ser filtrada pelo Eixo no backend.</small>
+        </div>
+
+        <div class="split" style="margin-top:.5rem;">
+          <button type="submit" class="btn btn-primary">Buscar</button>
+          <a class="btn btn-ghost" href="{% url 'guia:home' %}">Limpar</a>
+        </div>
+      </form>
+    </aside>
+
+    <main>
+      <div class="card {% if request.GET.q or request.GET.eixo or request.GET.procedimento %}is-hidden{% endif %}" id="quickSearch">
+        <h2>Buscar procedimento</h2>
+        <form method="get" action="" id="quickSearchForm">
+          <div class="split">
+            <input id="q_quick" name="q" type="text" placeholder="Ex.: Progressão funcional, Teletrabalho, Itinerância…">
+            <button type="submit" class="btn btn-primary">Buscar</button>
+          </div>
+          <p class="muted" style="margin:.5rem 0 0 0;">Digite uma palavra-chave e pressione <kbd>Enter</kbd>. Após a primeira busca, você verá os filtros.</p>
+        </form>
+      </div>
+
+      <div class="card" id="results">
+        <div class="split" style="margin-bottom:.5rem;">
+          <h2 style="margin:0;">Resultados</h2>
+          {% if request.GET.q or request.GET.eixo or request.GET.procedimento %}
+            <span class="muted">Mostrando itens filtrados</span>
+          {% else %}
+            <span class="muted">Nada filtrado ainda</span>
+          {% endif %}
+        </div>
+
+        {% if procedimentos %}
+          <ul class="list">
+            {% for proc in procedimentos %}
+              <li>
+                <a href="{% url 'guia:procedure_detail' proc.slug %}">
+                  <strong>{{ proc.titulo }}</strong>
+                  {% if proc.eixo %}<br><span class="muted">Eixo: {{ proc.eixo.nome }}</span>{% endif %}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+
+          {% if page_obj %}
+            <div class="split" style="margin-top:1rem;">
+              <div class="muted">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</div>
+              <div>
+                {% if page_obj.has_previous %}
+                  <a class="btn btn-ghost" href="?{% if request.GET.q %}q={{ request.GET.q|urlencode }}&{% endif %}{% if request.GET.eixo %}eixo={{ request.GET.eixo }}&{% endif %}{% if request.GET.procedimento %}procedimento={{ request.GET.procedimento }}&{% endif %}page={{ page_obj.previous_page_number }}">Anterior</a>
+                {% endif %}
+                {% if page_obj.has_next %}
+                  <a class="btn btn-ghost" href="?{% if request.GET.q %}q={{ request.GET.q|urlencode }}&{% endif %}{% if request.GET.eixo %}eixo={{ request.GET.eixo }}&{% endif %}{% if request.GET.procedimento %}procedimento={{ request.GET.procedimento }}&{% endif %}page={{ page_obj.next_page_number }}">Próxima</a>
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+        {% else %}
+          <p class="muted" style="margin:0;">
+            {% if request.GET.q or request.GET.eixo or request.GET.procedimento %}
+              Nenhum procedimento encontrado para os filtros aplicados.
+            {% else %}
+              Faça uma busca para ver os procedimentos.
+            {% endif %}
+          </p>
+        {% endif %}
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const params = new URLSearchParams(window.location.search);
+    const hasQuery = params.get('q') || params.get('eixo') || params.get('procedimento');
+    const filters = document.getElementById('filters');
+    const quick = document.getElementById('quickSearch');
+    if (hasQuery && filters) filters.classList.remove('is-hidden');
+    if (hasQuery && quick) quick.classList.add('is-hidden');
+  })();
+</script>
+{% endblock %}

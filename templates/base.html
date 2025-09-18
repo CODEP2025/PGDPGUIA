@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Guia PGDP{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <style>
+    @media print {
+      .no-print { display:none !important; }
+      body { color: #000; }
+    }
+  </style>
+</head>
+<body>
+  <header class="no-print" style="padding:1rem;border-bottom:1px solid #eee;">
+    <strong>Guia PGDP</strong>
+  </header>
+  <main style="padding:1rem;">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
